@@ -220,7 +220,7 @@ local function make_gradation(foreground, background)
 	return gradations
 end
 
-local function make_invert_accent(accent_lch)
+local function invert_lch(accent_lch)
 	local L, C, H = unpack(accent_lch)
 
 	H = H + math.pi % (2 * math.pi)
@@ -228,10 +228,13 @@ local function make_invert_accent(accent_lch)
 	return { L, C, H }
 end
 
+local function invert_color_str(color_str)
+	return lch_to_str(invert_lch(str_to_lch(color_str)))
+end
+
 local function make_syntax(foreground, background, accent, gradient, secondary)
 	-- make colors
 	local fore_lch = str_to_lch(foreground)
-	local grad5_lch = str_to_lch(gradient[5])
 	local grad4_lch = str_to_lch(gradient[4])
 	local accent_lch = str_to_lch(accent)
 	local secondary_lch = type(secondary) == "string" and str_to_lch(secondary) or accent_lch
@@ -400,6 +403,7 @@ local function apply_syntax(foreground, theme)
 end
 
 local function apply(theme)
+	if not theme.accent then theme.accent = theme.foreground end
 	vim.api.nvim_set_option_value("termguicolors", theme.guicolors, { scope = "global" })
 	vim.api.nvim_set_option_value("background", theme.type, { scope = "global" })
 	vim.cmd [[hi clear]]
@@ -413,9 +417,7 @@ local function apply(theme)
 		end
 	end
 	apply_syntax(theme.foreground, syntax)
-	if theme.accent then
-		apply_ui(theme.foreground, theme.background, theme.accent, gradient)
-	end
+	apply_ui(theme.foreground, theme.background, theme.accent, gradient)
 	if theme.custom then
 		for k, v in pairs(theme.custom) do
 			hi(0, k, v)
@@ -426,4 +428,6 @@ end
 -- return package metatable
 local M = {}
 M.apply = apply
+M.make_gradation = make_gradation
+M.invert_color = invert_color_str
 return M

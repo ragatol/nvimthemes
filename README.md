@@ -35,3 +35,6 @@ a folder in one the paths listed in `runtimepath`.
 
 ![saria_darker preview](previews/saria_darker.jpg)
 
+### paper
+
+![paper preview](previews/paper.jpg)
